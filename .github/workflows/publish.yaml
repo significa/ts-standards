@@ -38,6 +38,8 @@ jobs:
 
       - name: Publish to npm
         working-directory: ${{ steps.pkg.outputs.dir }}
-        run: pnpm publish --no-git-checks --access=public --provenance
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+          pnpm publish --no-git-checks --access=public --provenance
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
