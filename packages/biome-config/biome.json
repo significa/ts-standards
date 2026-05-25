@@ -40,6 +40,15 @@
       "recommended": true,
       "suspicious": {
         "noConsole": "warn"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": { "maxAllowedComplexity": 25 }
+        }
       }
     }
   }
