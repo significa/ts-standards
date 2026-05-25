@@ -7,6 +7,8 @@ Significa's shared [Biome](https://biomejs.dev) configuration.
 - Space indent, line width 100.
 - `organizeImports` on (alphabetical, named-imports sorted, preserves blank-line groups).
 - `console.*` warns (not error — so it doesn't fail CI; bump per-project if you want).
+- `noFloatingPromises` errors — catches unhandled async calls (a common AI-generated bug).
+- `noExcessiveCognitiveComplexity` warns at threshold 25 — catches god-functions without being pedantic.
 - Build/cache directories ignored: `.astro`, `.output`, `.vite`, `.next`, `dist`, `build`, `coverage`, `node_modules`.
 
 ## Install
