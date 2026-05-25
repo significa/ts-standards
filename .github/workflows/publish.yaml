@@ -18,6 +18,9 @@ jobs:
 
       - uses: jdx/mise-action@v2
 
+      - name: Update npm to a version with trusted publishing
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -36,4 +39,4 @@ jobs:
 
       - name: Publish to npm
         working-directory: ${{ steps.pkg.outputs.dir }}
-        run: pnpm publish --no-git-checks --access=public --provenance
+        run: npm publish --access=public --provenance
