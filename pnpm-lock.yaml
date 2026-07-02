@@ -11,12 +11,6 @@ importers:
       '@biomejs/biome':
         specifier: 2.4.10
         version: 2.4.10
-      '@significa/biome-config':
-        specifier: workspace:*
-        version: link:packages/biome-config
-      '@significa/tsconfig':
-        specifier: workspace:*
-        version: link:packages/tsconfig
 
   packages/biome-config: {}
 

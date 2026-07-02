@@ -1,16 +1,30 @@
 {
-  "name": "code-quality",
-  "private": true,
+  "name": "@significa/ts-standards",
+  "version": "0.0.1-development",
+  "description": "Significa's shared TypeScript / JavaScript standards: Biome config and tsconfig presets.",
+  "license": "MIT",
+  "repository": "github:significa/ts-standards",
   "packageManager": "pnpm@10.0.0",
+  "files": [
+    "biome",
+    "tsconfig"
+  ],
+  "exports": {
+    "./biome": "./biome/biome.json",
+    "./tsconfig/base": "./tsconfig/base.json",
+    "./tsconfig/react": "./tsconfig/react.json",
+    "./tsconfig/astro": "./tsconfig/astro.json",
+    "./tsconfig/node": "./tsconfig/node.json",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check": "biome ci .",
-    "format": "biome check --write .",
-    "release:biome-config": "cd packages/biome-config && pnpm version --tag-version-prefix=biome-config-v",
-    "release:tsconfig": "cd packages/tsconfig && pnpm version --tag-version-prefix=tsconfig-v"
+    "format": "biome check --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.10",
-    "@significa/biome-config": "workspace:*",
-    "@significa/tsconfig": "workspace:*"
+    "@biomejs/biome": "2.4.10"
   }
 }

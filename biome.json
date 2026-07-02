@@ -1,7 +1,4 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
-  "extends": ["@significa/biome-config"],
-  "files": {
-    "includes": ["!**/packages/*/README.md"]
-  }
+  "extends": ["./biome/biome.json"]
 }

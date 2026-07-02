@@ -1,0 +1,29 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  test-and-publish:
+    name: Test and publish
+    uses: significa/actions/.github/workflows/npm-library.yaml@main
+    permissions:
+      contents: read
+      packages: write
+    with:
+      package_manager: pnpm
+      install_command: pnpm install --frozen-lockfile
+      lint_command: pnpm check
+      test_command: null
+      build_command: npm pack --dry-run
+      publish_to_github_registry: true
+      publish_to_npm_registry: true
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
