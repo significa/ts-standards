@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: oklch(0.6 0.2 250);
+}
+
+@utility card {
+  @apply rounded-lg;
+  corner-shape: squircle;
+}

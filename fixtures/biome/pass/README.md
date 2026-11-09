@@ -1,0 +1,3 @@
+# Fixture
+
+Markdown file.

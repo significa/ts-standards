@@ -4,7 +4,7 @@
   "description": "Significa's shared TypeScript / JavaScript standards: Biome config and tsconfig presets.",
   "license": "MIT",
   "repository": "github:significa/ts-standards",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.34.9",
   "files": [
     "biome",
     "tsconfig"
@@ -22,9 +22,22 @@
   },
   "scripts": {
     "check": "biome ci .",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "test": "node scripts/test.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.10"
+    "@biomejs/biome": "2.6.6"
+  },
+  "peerDependencies": {
+    "@biomejs/biome": ">=2.6.0 <3",
+    "typescript": "^6.0.0 || ^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@biomejs/biome": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
   }
 }
