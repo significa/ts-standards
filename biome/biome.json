@@ -1,6 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
-  "root": false,
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -9,10 +8,13 @@
       "!**/.output",
       "!**/.vite",
       "!**/.next",
+      "!**/.tanstack",
+      "!**/.wrangler",
       "!**/dist",
       "!**/build",
       "!**/coverage",
       "!**/node_modules",
+      "!**/routeTree.gen.ts",
       "!**/.claude/settings.local.json"
     ]
   },
@@ -29,28 +31,89 @@
       "trailingCommas": "all"
     }
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "domains": {
-      "project": "recommended",
-      "react": "recommended",
-      "test": "recommended"
+      "project": "recommended"
     },
     "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noConsole": "warn"
-      },
-      "nursery": {
-        "noFloatingPromises": "error"
-      },
+      "preset": "recommended",
       "complexity": {
         "noExcessiveCognitiveComplexity": {
           "level": "warn",
-          "options": { "maxAllowedComplexity": 25 }
+          "options": {
+            "maxAllowedComplexity": 25
+          }
+        }
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "warn",
+        "noUselessTypeAssertion": "warn",
+        "useExhaustiveSwitchCases": "warn"
+      },
+      "performance": {
+        "noBarrelFile": "warn",
+        "noReExportAll": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "error",
+        "useThrowOnlyError": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"],
+            "requireAscii": true
+          }
+        }
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn"]
+          }
+        },
+        "noDeprecatedImports": "warn",
+        "noExplicitAny": "error",
+        "noImportCycles": "warn",
+        "noUnusedExpressions": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/routes/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
         }
       }
     }
-  }
+  ]
 }
