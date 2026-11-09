@@ -221,7 +221,7 @@ The presets support TypeScript 6 and 7. Use 6.0.x for now. We'll revisit when Ty
 4. Remove settings the preset now covers: Tailwind directives parsing, ignores for `.wrangler`, `.tanstack` and `routeTree.gen.ts`, and `noArrayIndexKey: "off"`.
 5. `base` and `node` no longer include DOM types. Under `base`, add a `types` entry for your runtime.
 6. `exactOptionalPropertyTypes` is off. Set it back to `true` in your tsconfig if you relied on it.
-7. In `react`, drop `vite/client` and `allowImportingTsExtensions` from your tsconfig; the preset has both.
+7. In `react`, remove `allowImportingTsExtensions`; the preset has it. Remove `types` only if it is exactly `["vite/client"]`. If it lists other types too, keep `vite/client` in it, because your list replaces the preset's.
 
 Still on `@significa/biome-config` or `@significa/tsconfig`? Both are deprecated. Replace them with this package and follow the steps above.
 
