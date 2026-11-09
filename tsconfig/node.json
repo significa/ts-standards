@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "@significa/tsconfig/node",
+  "display": "@significa/ts-standards/tsconfig/node",
   "extends": "./base.json",
   "compilerOptions": {
+    "target": "ES2025",
+    "lib": ["ES2025"],
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "types": ["node"]
   }
 }
