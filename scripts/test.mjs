@@ -52,7 +52,7 @@ for (const { name, tsc } of compilers) {
 const biomeDir = join(fixtures, "biome");
 const { output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
 const actualBiomeErrors = [...output.matchAll(/^::error title=([^,]+),file=([^,]+),/gm)].map(
-  ([, rule, file]) => `${relative(biomeDir, file)} ${rule}`,
+  ([, rule, file]) => `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`,
 );
 const missing = expectedBiomeErrors.filter((error) => !actualBiomeErrors.includes(error));
 const unexpected = actualBiomeErrors.filter((error) => !expectedBiomeErrors.includes(error));
