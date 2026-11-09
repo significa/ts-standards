@@ -54,6 +54,7 @@ Run `pnpm exec biome check --write .` to fix, `pnpm exec biome ci .` to verify. 
 - Double quotes (JS and JSX), semicolons always, trailing commas everywhere, 2-space indent, line width 100.
 - `organizeImports` on.
 - `css.parser.tailwindDirectives` on (harmless without Tailwind).
+- Markdown and YAML are formatted too (Biome's default in 2.6; it didn't in 2.4).
 - Ignored: `.astro`, `.output`, `.vite`, `.next`, `.tanstack`, `.wrangler`, `dist`, `build`, `coverage`, `node_modules`, `routeTree.gen.ts`, `.claude/settings.local.json`.
 - No VCS integration: `vcs.useIgnoreFile` errors when the folder holding `biome.json` has no `.gitignore`. Turn it on in your own config if you want `.gitignore` respected.
 
@@ -205,7 +206,7 @@ The presets support TypeScript `^6.0.0 || ^7.0.0`, and CI checks every preset on
 
 ## Upgrading from 0.1.0
 
-1. Bump `@biomejs/biome` to ≥ 2.6 and run `pnpm exec biome migrate --write`.
+1. Bump `@biomejs/biome` to ≥ 2.6 and run `pnpm exec biome migrate --write`. Biome 2.6 also formats Markdown and YAML, and its JS formatter output changed slightly: run `pnpm exec biome format --write .` and commit that on its own. To leave Markdown as written, add `"markdown": { "formatter": { "enabled": false } }`.
 2. Run `pnpm exec biome ci .`. New errors: `noConsole` (`log`/`info`/`debug`), `noExplicitAny`, `noNonNullAssertion`, `useThrowOnlyError`, `noUnusedExpressions` (rewrite `x satisfies never;` as `void (x satisfies never);`), `useFilenamingConvention` (rename to kebab-case). Fix them, or turn a rule down in your `biome.json` with a reason.
 3. Delete what the preset now covers: `css.parser.tailwindDirectives`, ignores for `.wrangler` / `.tanstack` / `routeTree.gen.ts`, `noArrayIndexKey: "off"`, and the `suppressions/unused` warnings Biome now reports.
 4. `base` and `node` no longer include the DOM lib. Code that used `document`/`window` there was wrong; code that used `console`, `fetch` or `URL` under `base` needs a `types` entry for its runtime.
