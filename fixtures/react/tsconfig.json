@@ -1,0 +1,4 @@
+{
+  "extends": "@significa/ts-standards/tsconfig/react",
+  "include": ["src"]
+}

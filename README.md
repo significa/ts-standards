@@ -1,151 +1,124 @@
 # @significa/ts-standards
 
-Significa's shared TypeScript / JavaScript standards: the [Biome](https://biomejs.dev) config and the tsconfig presets, in one package with one version.
+Significa's shared [Biome](https://biomejs.dev) config and tsconfig presets, in one package with one version.
 
-The CI side (running Biome + tsc + Knip in GitHub Actions) is shipped by [`significa/actions`](https://github.com/significa/actions) — see its [`typescript-quality.yaml`](https://github.com/significa/actions/blob/main/.github/workflows/typescript-quality.yaml) reusable workflow. Knip configuration is per-project; see Knip's docs.
-
-## Install
+## Setup
 
 ```sh
-pnpm add -D -E @significa/ts-standards @biomejs/biome typescript
+pnpm add -D -E @significa/ts-standards @biomejs/biome@2.6 typescript@6
 ```
 
-## Biome config
-
-Create `biome.json` at your project root:
+`biome.json`:
 
 ```json
 {
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
   "extends": ["@significa/ts-standards/biome"]
 }
 ```
 
-Add overrides as needed — they merge on top of the shared config. What it sets:
-
-- Recommended rules across the `project`, `react`, and `test` domains.
-- Double quotes (JS and JSX), semicolons always, trailing commas everywhere.
-- Space indent, line width 100.
-- `organizeImports` on (alphabetical, named-imports sorted, preserves blank-line groups).
-- `console.*` warns (not error — so it doesn't fail CI; bump per-project if you want).
-- `noFloatingPromises` errors — catches unhandled async calls (a common AI-generated bug).
-- `noExcessiveCognitiveComplexity` warns at threshold 25 — catches god-functions without being pedantic.
-- Build/cache directories ignored: `.astro`, `.output`, `.vite`, `.next`, `dist`, `build`, `coverage`, `node_modules`, plus `.claude/settings.local.json`.
-
-### Editor setup
-
-VSCode — install the [Biome extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome), then in `.vscode/settings.json`:
-
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports.biome": "explicit",
-    "source.fixAll.biome": "explicit"
-  }
-}
-```
-
-Zed — install the `biome` extension (`cmd-shift-p` → "zed: extensions"), then in your settings:
-
-```json
-{
-  "code_actions_on_format": {
-    "source.organizeImports.biome": true,
-    "source.fixAll.biome": true
-  },
-  "lsp": {
-    "biome": {
-      "settings": { "require_config_file": true }
-    }
-  }
-}
-```
-
-`require_config_file: true` prevents Biome from running on projects that don't have a `biome.json`.
-
-### Tailwind class sorting
-
-Not enabled by default (it's a nursery rule and the `functions` array is project-specific). To opt in:
-
-```json
-{
-  "extends": ["@significa/ts-standards/biome"],
-  "linter": {
-    "rules": {
-      "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "fix": "safe",
-          "options": { "functions": ["cn", "cva"] }
-        }
-      }
-    }
-  }
-}
-```
-
-## tsconfig presets
-
-Four variants, all strict, all `noEmit` (Biome handles syntax; tsc handles type-checking only). There is no default — pick the one matching your stack.
-
-### `tsconfig/base` — neutral foundation
-
-Strict mode, `target: ES2023`, `module: preserve`, `noEmit`, `verbatimModuleSyntax`, `erasableSyntaxOnly`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`. **No DOM lib, no JSX, no `allowImportingTsExtensions`.** Pick this only if your code is truly runtime-agnostic (rare). Most projects extend `react`, `astro`, or `node` directly.
-
-```json
-{
-  "extends": "@significa/ts-standards/tsconfig/base",
-  "include": ["src"]
-}
-```
-
-### `tsconfig/react` — TanStack Start, Vite React
-
-Extends `base`. Adds DOM lib, `jsx: react-jsx`, `allowImportingTsExtensions`.
+`tsconfig.json`, with the [preset](#tsconfig-presets) for your stack:
 
 ```json
 {
   "extends": "@significa/ts-standards/tsconfig/react",
-  "include": ["src", "vite.config.ts"]
+  "include": ["src"]
 }
 ```
 
-### `tsconfig/astro` — Astro projects
+That is the whole setup. Fix with `pnpm exec biome check --write .` and verify with `pnpm exec biome ci .` and `pnpm exec tsc`.
 
-Extends `base`. Adds DOM lib, `jsx: preserve`, `allowImportingTsExtensions`. Pre-includes `${configDir}/.astro/types.d.ts` and `${configDir}/**/*`, excludes `dist`.
+## What Biome enforces
+
+Biome's recommended rules, plus the ones below. React, test and Tailwind rules turn on by themselves when those packages are in your `package.json`.
+
+Errors fail CI:
+
+- No floating promises (`noFloatingPromises`). An unawaited promise swallows its errors.
+- No `console.log` (`noConsole`). `console.error` and `console.warn` are allowed, and so is anything in a `scripts/` folder.
+- No `any` (`noExplicitAny`). Use `unknown` and narrow.
+- No non-null assertions (`noNonNullAssertion`). Guard or narrow instead of using `!`.
+- Throw only `Error` objects (`useThrowOnlyError`), so you keep the stack trace.
+- Kebab-case file names (`useFilenamingConvention`), `.astro` files included. `routes/` folders are exempt, for file-based routers.
+
+Warnings never fail CI. They flag code worth a second look:
+
+- Misused promises (`noMisusedPromises`), non-exhaustive switches (`useExhaustiveSwitchCases`) and useless type assertions (`noUselessTypeAssertion`).
+- Import cycles (`noImportCycles`) and deprecated imports (`noDeprecatedImports`).
+- Barrel files (`noBarrelFile`, `noReExportAll`).
+- Overly complex functions (`noExcessiveCognitiveComplexity`, threshold 25).
+
+Turned off: array index as a React key (`noArrayIndexKey`).
+
+Formatting: double quotes, semicolons, trailing commas, 2-space indent, line width 100, sorted imports. Markdown and YAML are formatted too.
+
+Build output, `node_modules`, `coverage` and generated route trees are already ignored. Tailwind v4 CSS parses without extra config.
+
+### Good to know
+
+- **Update Biome together with this package.** The preset is tested against one Biome minor (2.6), because some of its rules are still experimental and can be renamed in a minor release.
+- **Ignoring more files:** your `files.includes` is added after the preset's list, so add exclusions only, e.g. `["!drizzle"]`. Don't start the list with `"**"`.
+- **Monorepos:** put one `biome.json` at the root. A nested `biome.json` must contain `{ "extends": "//" }`.
+- **Leaving Markdown alone:** `"markdown": { "formatter": { "enabled": false } }`.
+- **Coding agents:** `biome ci --reporter=concise` gives compact output.
+
+### Tailwind class sorting
+
+Opt in per project, because Biome needs the path to the CSS file with your `@theme` to sort custom classes. `cn`, `clsx`, `cva` and `tv` are recognised by default.
 
 ```json
 {
-  "extends": "@significa/ts-standards/tsconfig/astro",
-  "compilerOptions": {
-    "paths": { "@/*": ["./src/*"] }
+  "tailwind": { "stylesheet": "./src/styles.css" },
+  "linter": {
+    "rules": {
+      "nursery": { "useTailwindSortedClasses": { "level": "error", "fix": "safe" } }
+    }
   }
 }
 ```
 
-### `tsconfig/node` — Drizzle scripts, CLIs, tsx-run code, API-only services
+### Editor
 
-Extends `base`. Swaps to `module: NodeNext` + `moduleResolution: NodeNext`, adds `types: ["node"]`. No DOM lib (the `base` default is fine for Node).
+Install the Biome extension for [VS Code](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or Zed and enable format on save.
 
-```json
-{
-  "extends": "@significa/ts-standards/tsconfig/node",
-  "include": ["src", "scripts"]
-}
-```
+## tsconfig presets
+
+All are strict and type-check only (`noEmit`).
+
+| Preset  | For                            | Notes                                                                      |
+| ------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `react` | Vite React, TanStack Start     | Includes DOM and `vite/client` types. Needs `vite` installed.              |
+| `astro` | Astro                          | Already includes the project and `.astro/types.d.ts`; no `include` needed. |
+| `node`  | Node services, CLIs, scripts   | Node ≥ 24 (26 recommended). Needs `@types/node`.                           |
+| `base`  | Runtime-agnostic code, Workers | No runtime globals, not even `console`. Add your runtime's types.          |
+
+Use it as `"extends": "@significa/ts-standards/tsconfig/<preset>"`.
+
+### Good to know
+
+- **`types` replaces, it doesn't merge.** If you set `types` in your tsconfig, re-list the preset's, e.g. `["vite/client", "node"]`.
+- **Astro with React islands:** add `"jsx": "react-jsx"` and `"jsxImportSource": "react"` to `compilerOptions`.
+- **Node runs TypeScript directly**, which shapes the `node` preset:
+  - `"type": "module"` in `package.json`.
+  - Local imports carry the `.ts` extension.
+  - Aliases use [subpath imports](https://nodejs.org/api/packages.html#subpath-imports), since Node doesn't read `paths`: `"imports": { "#/*": "./src/*" }`.
+  - JSON imports need an attribute: `import data from "./data.json" with { type: "json" };`.
+
+## TypeScript versions
+
+The presets support TypeScript 6 and 7. Use 6.0.x for now. We'll revisit when TypeScript 7.1 is stable and Astro's tooling supports it.
 
 ## Versioning
 
-One version covers both configs — "the Significa standards vX". It stays in `0.x` indefinitely with **no semver guarantees** — minor bumps may change lint behavior or flip compiler options. Pin exactly (`pnpm add -E`) if you want reproducibility. We bump when Biome or TypeScript releases new versions or when we want a config change to roll out to all consumers.
+The package stays in `0.x`, and a minor version may change lint rules or compiler options. Pin the exact version. The [release notes](https://github.com/significa/ts-standards/releases) are the changelog and carry the upgrade steps.
 
-This package supersedes `@significa/biome-config` and `@significa/tsconfig`, which are deprecated on npm.
+`@significa/biome-config` and `@significa/tsconfig` are deprecated. Replace them with this package.
 
-## Releasing
+## Development
 
-Like every other Significa library: [create a release on GitHub](https://github.com/significa/ts-standards/releases/new) with a `v*` tag and a matching title (e.g. `v0.3.0`), and publishing it triggers CI, which stamps the version from the tag and publishes via the [`npm-library.yaml`](https://github.com/significa/actions/blob/main/.github/workflows/npm-library.yaml) reusable workflow.
+`pnpm check` lints the repo. `pnpm test` type-checks every preset with TypeScript 6 and 7 and runs the Biome preset against fixtures.
 
-The GitHub release notes are the changelog. The `version` field in `package.json` stays at `0.0.1-development` — never bump it manually.
+To release, [create a GitHub release](https://github.com/significa/ts-standards/releases/new) with a `v*` tag and a matching title. CI publishes to npm.
 
 ## License
 

@@ -1,11 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "@significa/tsconfig/astro",
+  "display": "@significa/ts-standards/tsconfig/astro",
   "extends": "./base.json",
   "compilerOptions": {
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "jsx": "preserve",
-    "allowImportingTsExtensions": true
+    "lib": ["ES2023", "DOM"],
+    "jsx": "preserve"
   },
   "include": ["${configDir}/.astro/types.d.ts", "${configDir}/**/*"],
   "exclude": ["${configDir}/dist"]
