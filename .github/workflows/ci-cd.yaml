@@ -18,7 +18,7 @@ jobs:
       contents: read
       packages: write
     with:
-      node_versions: '["24"]'
+      node_versions: '["26"]'
       package_manager: pnpm
       install_command: pnpm install --frozen-lockfile
       lint_command: pnpm check
