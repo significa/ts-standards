@@ -10,10 +10,12 @@ const compilers = [
   { name: "TS 6", tsc: bin("typescript/bin/tsc") },
   { name: "TS 7", tsc: bin("typescript7/bin/tsc") },
 ];
+const biome = bin("@biomejs/biome/bin/biome");
 const tsconfigFixtures = ["base", "react", "astro", "node"];
 
 // Every error biome must report in fixtures/biome, and nothing else.
 const expectedBiomeErrors = [
+  "fail/PascalCase.astro lint/style/useFilenamingConvention",
   "fail/PascalCase.ts lint/style/useFilenamingConvention",
   "fail/console-log.ts lint/suspicious/noConsole",
   "fail/explicit-any.ts lint/suspicious/noExplicitAny",
@@ -35,7 +37,8 @@ function report(ok, label, details = "") {
 
 function run(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: "utf8" });
-  return { status: result.status, output: `${result.stdout}${result.stderr}`.trim() };
+  if (result.error) return { status: null, output: result.error.message };
+  return { status: result.status, output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim() };
 }
 
 for (const { name, tsc } of compilers) {
@@ -47,7 +50,7 @@ for (const { name, tsc } of compilers) {
 }
 
 const biomeDir = join(fixtures, "biome");
-const { output } = run(bin(".bin/biome"), ["lint", ".", "--reporter=github"], biomeDir);
+const { output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
 const actualBiomeErrors = [...output.matchAll(/^::error title=([^,]+),file=([^,]+),/gm)].map(
   ([, rule, file]) => `${relative(biomeDir, file)} ${rule}`,
 );

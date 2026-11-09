@@ -8,7 +8,7 @@ Significa's shared [Biome](https://biomejs.dev) config and tsconfig presets, in 
 pnpm add -D -E @significa/ts-standards @biomejs/biome typescript@6
 ```
 
-Needs Biome ≥ 2.6 and TypeScript 6 or 7. Both are optional peers, so skip the one you don't use.
+Needs Biome 2.6 and TypeScript 6 or 7. Both are optional peers, so skip the one you don't use.
 
 ## Biome
 
@@ -21,7 +21,9 @@ Create `biome.json` at the project root:
 }
 ```
 
-Fix with `pnpm exec biome check --write .` and verify with `pnpm exec biome ci .`.
+Fix with `pnpm exec biome check --write .` and verify with `pnpm exec biome ci .`. Use `biome ci --reporter=concise` for compact output that's easier for coding agents to read.
+
+The preset is tested against one Biome minor (2.6) and enables nursery rules that can change in a minor release. Update Biome together with ts-standards.
 
 CI fails on errors only. Warnings flag rules with known false positives or code worth a second look, and never block a merge.
 
@@ -32,12 +34,12 @@ Biome's recommended rules are on. React, test and Tailwind rules turn on by them
 Errors (fail CI):
 
 - No floating promises (`noFloatingPromises`). An unawaited promise swallows its errors.
-- No `console.log` (`noConsole`). `console.error` and `console.warn` are allowed, and `scripts/` is exempt.
+- No `console.log` (`noConsole`). `console.error` and `console.warn` are allowed, and `scripts/` is exempt (at any depth).
 - No `any` (`noExplicitAny`). Use `unknown` and narrow.
 - No non-null assertions (`noNonNullAssertion`). Guard or narrow instead of using `!`.
 - Throw only `Error` objects (`useThrowOnlyError`), so you keep the stack trace.
 - No statements that do nothing (`noUnusedExpressions`).
-- Kebab-case file names (`useFilenamingConvention`). `routes/` is exempt for file-based routers.
+- Kebab-case file names (`useFilenamingConvention`). `routes/` is exempt for file-based routers (at any depth). This also applies to `.astro` files; see [Astro](#astro).
 
 Warnings:
 
@@ -91,9 +93,33 @@ Biome only sees the frontmatter of `.astro` files, so it flags variables used on
 }
 ```
 
+Astro projects often use PascalCase components, which the kebab-case rule rejects. To allow both in `.astro` files:
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": { "filenameCases": ["kebab-case", "PascalCase"] }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+(Merge this into the same `overrides` array as above.)
+
 ### Tailwind class sorting
 
-Opt in per project. Point `stylesheet` at the CSS file with your `@theme`, so custom classes sort correctly. `cn`, `clsx`, `cva` and `tv` are recognised by default.
+Opt in per project. Point `stylesheet` at the CSS file with your `@theme`, so custom classes sort correctly. The file must exist, or Biome fails to load the config. `cn`, `clsx`, `cva` and `tv` are recognised by default.
 
 ```json
 {
@@ -167,6 +193,7 @@ Already includes the project and `.astro/types.d.ts`. With React islands, add `"
 Supports Node ≥ 24. Node 26 is recommended for new projects. Also needs:
 
 - `@types/node` installed.
+- JSON imports need an import attribute: `import data from "./data.json" with { type: "json" };`.
 - `"type": "module"` in `package.json`.
 - Local imports with the `.ts` extension.
 - [Subpath imports](https://nodejs.org/api/packages.html#subpath-imports) for aliases, since Node doesn't read `paths`: `"imports": { "#/*": "./src/*" }`, then `import { x } from "#/x.ts"`.

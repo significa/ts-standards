@@ -29,7 +29,7 @@
     "@biomejs/biome": "2.6.6"
   },
   "peerDependencies": {
-    "@biomejs/biome": ">=2.6.0 <3",
+    "@biomejs/biome": ">=2.6.0 <2.7.0",
     "typescript": "^6.0.0 || ^7.0.0"
   },
   "peerDependenciesMeta": {
