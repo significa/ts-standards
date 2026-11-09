@@ -13,7 +13,7 @@ const compilers = [
 const biome = bin("@biomejs/biome/bin/biome");
 const tsconfigFixtures = ["base", "react", "astro", "node"];
 
-// Every diagnostic biome must report in fixtures/biome, and nothing else: warnings count too.
+// Every error biome must report in fixtures/biome. Anything else fails, warnings included.
 const expectedBiomeErrors = [
   "fail/PascalCase.astro lint/style/useFilenamingConvention",
   "fail/PascalCase.ts lint/style/useFilenamingConvention",
@@ -49,14 +49,18 @@ for (const { name, tsc } of compilers) {
 }
 
 const biomeDir = join(fixtures, "biome");
-const { output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
+const { status, output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
+// A warning keeps its prefix, so it can never stand in for an expected error.
 const actualBiomeErrors = [
-  ...output.matchAll(/^::(?:error|warning) title=([^,]+),file=([^,]+),/gm),
-].map(([, rule, file]) => `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`);
+  ...output.matchAll(/^::(error|warning) title=([^,]+),file=([^,]+),/gm),
+].map(([, severity, rule, file]) => {
+  const diagnostic = `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`;
+  return severity === "error" ? diagnostic : `warning: ${diagnostic}`;
+});
 const missing = expectedBiomeErrors.filter((error) => !actualBiomeErrors.includes(error));
 const unexpected = actualBiomeErrors.filter((error) => !expectedBiomeErrors.includes(error));
 report(
-  missing.length === 0 && unexpected.length === 0,
+  status === 1 && missing.length === 0 && unexpected.length === 0,
   `biome fixture (${expectedBiomeErrors.length} expected errors, pass/ clean)`,
   [...missing.map((e) => `missing:    ${e}`), ...unexpected.map((e) => `unexpected: ${e}`)].join(
     "\n",
