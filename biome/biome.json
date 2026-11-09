@@ -88,8 +88,7 @@
         },
         "noDeprecatedImports": "warn",
         "noExplicitAny": "error",
-        "noImportCycles": "warn",
-        "noUnusedExpressions": "error"
+        "noImportCycles": "warn"
       }
     }
   },
@@ -110,6 +109,17 @@
         "rules": {
           "style": {
             "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off"
           }
         }
       }

@@ -13,7 +13,7 @@ const compilers = [
 const biome = bin("@biomejs/biome/bin/biome");
 const tsconfigFixtures = ["base", "react", "astro", "node"];
 
-// Every error biome must report in fixtures/biome, and nothing else.
+// Every diagnostic biome must report in fixtures/biome, and nothing else: warnings count too.
 const expectedBiomeErrors = [
   "fail/PascalCase.astro lint/style/useFilenamingConvention",
   "fail/PascalCase.ts lint/style/useFilenamingConvention",
@@ -22,7 +22,6 @@ const expectedBiomeErrors = [
   "fail/floating-promise.ts lint/nursery/noFloatingPromises",
   "fail/non-null.ts lint/style/noNonNullAssertion",
   "fail/throw-string.ts lint/style/useThrowOnlyError",
-  "fail/unused-expression.ts lint/suspicious/noUnusedExpressions",
 ];
 
 let failures = 0;
@@ -51,9 +50,9 @@ for (const { name, tsc } of compilers) {
 
 const biomeDir = join(fixtures, "biome");
 const { output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
-const actualBiomeErrors = [...output.matchAll(/^::error title=([^,]+),file=([^,]+),/gm)].map(
-  ([, rule, file]) => `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`,
-);
+const actualBiomeErrors = [
+  ...output.matchAll(/^::(?:error|warning) title=([^,]+),file=([^,]+),/gm),
+].map(([, rule, file]) => `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`);
 const missing = expectedBiomeErrors.filter((error) => !actualBiomeErrors.includes(error));
 const unexpected = actualBiomeErrors.filter((error) => !expectedBiomeErrors.includes(error));
 report(
