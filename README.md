@@ -97,10 +97,18 @@ Astro projects extend the Astro preset instead. It builds on the base preset and
 It's a separate preset because it turns on Biome's experimental full HTML support, which also changes how `.vue`, `.svelte` and `.html` files are handled. Two caveats:
 
 - When Biome wraps a line, it can drop the space between a component and the text after it, e.g. `<Icon /> Label` becomes `<Icon />Label`. Review the diff after the first `biome check --write`.
-- Safe fixes also rewrite code inside inline `<script>` tags. Turn the linter off for files with vendored snippets:
+- Safe fixes and the formatter both rewrite code inside inline `<script>` tags. Turn both off for files with vendored snippets:
 
   ```json
-  { "overrides": [{ "includes": ["src/components/analytics.astro"], "linter": { "enabled": false } }] }
+  {
+    "overrides": [
+      {
+        "includes": ["src/components/analytics.astro"],
+        "linter": { "enabled": false },
+        "formatter": { "enabled": false }
+      }
+    ]
+  }
   ```
 
 ### Editor
