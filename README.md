@@ -5,7 +5,7 @@ Significa's shared [Biome](https://biomejs.dev) config and tsconfig presets, in 
 ## Setup
 
 ```sh
-pnpm add -D -E @significa/ts-standards @biomejs/biome@2.6 typescript@6
+pnpm add -D -E @significa/ts-standards @biomejs/biome@2.6 typescript@6.0
 ```
 
 `biome.json`:
@@ -48,9 +48,14 @@ Warnings never fail CI. They flag code worth a second look:
 - Barrel files (`noBarrelFile`, `noReExportAll`).
 - Overly complex functions (`noExcessiveCognitiveComplexity`, threshold 25).
 
-Turned off: array index as a React key (`noArrayIndexKey`).
+Turned off:
+
+- Array index as a React key (`noArrayIndexKey`).
+- Label without a control (`noLabelWithoutControl`). Biome lints source, so it can't see that a component like `<Checkbox />` renders an input, or label text passed through props. In component code its errors are mostly false positives, and an accessibility check on the rendered page (e.g. axe in Playwright) covers label association properly.
 
 Formatting: double quotes, semicolons, trailing commas, 2-space indent, line width 100, sorted imports. Markdown and YAML are formatted too.
+
+In `.astro` files the unused-import and unused-variable checks are off, because Biome only reads their frontmatter.
 
 Build output, `node_modules`, `coverage` and generated route trees are already ignored. Tailwind v4 CSS parses without extra config.
 
@@ -83,7 +88,7 @@ Install the Biome extension for [VS Code](https://marketplace.visualstudio.com/i
 
 ## tsconfig presets
 
-All are strict and type-check only (`noEmit`).
+All are strict and type-check only (`noEmit`). Beyond `strict`, they set `noUncheckedIndexedAccess`, `noImplicitReturns`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly` and `allowImportingTsExtensions`.
 
 | Preset  | For                            | Notes                                                                      |
 | ------- | ------------------------------ | -------------------------------------------------------------------------- |
@@ -103,6 +108,7 @@ Use it as `"extends": "@significa/ts-standards/tsconfig/<preset>"`.
   - Local imports carry the `.ts` extension.
   - Aliases use [subpath imports](https://nodejs.org/api/packages.html#subpath-imports), since Node doesn't read `paths`: `"imports": { "#/*": "./src/*" }`.
   - JSON imports need an attribute: `import data from "./data.json" with { type: "json" };`.
+  - A service that compiles with `tsc` to `dist` must set `"rewriteRelativeImportExtensions": true` in its emitting tsconfig (or `"allowImportingTsExtensions": false` when its imports end in `.js`), otherwise TS5096.
 
 ## TypeScript versions
 
