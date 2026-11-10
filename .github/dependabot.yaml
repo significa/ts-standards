@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # First match wins: every Biome update gets its own PR. A new minor fails CI until the
+      # preset's $schema and peer range move with it, which means a new ts-standards release.
+      biome:
+        patterns: ["@biomejs/biome"]
+      npm:
+        patterns: ["*"]
+        exclude-patterns: ["@biomejs/biome"]
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]

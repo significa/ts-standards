@@ -1,6 +1,7 @@
 // Runs every fixture as a consumer would. tsc fixtures assert expected errors with
 // `@ts-expect-error`, so a clean exit means both the passes and the failures held.
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const fixtures = join(import.meta.dirname, "..", "fixtures");
@@ -19,6 +20,7 @@ const expectedBiomeErrors = [
   "fail/PascalCase.ts lint/style/useFilenamingConvention",
   "fail/console-log.ts lint/suspicious/noConsole",
   "fail/explicit-any.ts lint/suspicious/noExplicitAny",
+  "fail/extensionless-import.ts lint/correctness/useImportExtensions",
   "fail/floating-promise.ts lint/nursery/noFloatingPromises",
   "fail/non-null.ts lint/style/noNonNullAssertion",
   "fail/throw-string.ts lint/style/useThrowOnlyError",
@@ -47,6 +49,26 @@ for (const { name, tsc } of compilers) {
     report(status === 0, `${name} (${version}) tsconfig/${fixture}`, output);
   }
 }
+
+// The installed Biome must be the minor the preset targets: its $schema URL and the peer range.
+// Only major.minor is compared, so patch bumps pass while a new minor fails until the preset moves.
+const root = join(import.meta.dirname, "..");
+const readJson = (path) => JSON.parse(readFileSync(join(root, path), "utf8"));
+const parseVersion = (text) => (text?.match(/(\d+)\.(\d+)\.(\d+)/) ?? []).slice(1, 4).map(Number);
+const compareVersions = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+const installedBiome = parseVersion(run(process.execPath, [biome, "--version"], fixtures).output);
+const schemaBiome = parseVersion(readJson("biome/biome.json").$schema);
+const [peerMin, peerMax] = readJson("package.json")
+  .peerDependencies["@biomejs/biome"].split(" ")
+  .map(parseVersion);
+const sameMinor = installedBiome[0] === schemaBiome[0] && installedBiome[1] === schemaBiome[1];
+const inPeerRange =
+  compareVersions(installedBiome, peerMin) >= 0 && compareVersions(installedBiome, peerMax) < 0;
+report(
+  sameMinor && inPeerRange,
+  `biome ${installedBiome.join(".")} matches the preset $schema and peer range`,
+  `$schema: ${schemaBiome.join(".")}, peer range: >=${peerMin.join(".")} <${peerMax.join(".")}`,
+);
 
 const biomeDir = join(fixtures, "biome");
 const { status, output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);

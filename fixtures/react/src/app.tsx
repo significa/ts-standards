@@ -1,4 +1,6 @@
 import "./styles.css";
+import { shout } from "#/format.ts";
+import { Button } from "#/ui/button.tsx";
 
 type AppProps = { label?: string };
 
@@ -12,6 +14,7 @@ function App({ label }: AppProps) {
   return (
     <a href={firstLink}>
       {label ?? import.meta.env.MODE} {[...new URLSearchParams("a=1").keys()].join()}
+      <Button label={shout("go")} />
     </a>
   );
 }

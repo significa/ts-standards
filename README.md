@@ -40,6 +40,7 @@ Errors fail CI:
 - No non-null assertions (`noNonNullAssertion`). Guard or narrow instead of using `!`.
 - Throw only `Error` objects (`useThrowOnlyError`), so you keep the stack trace.
 - Kebab-case file names (`useFilenamingConvention`), `.astro` files included. `routes/` folders are exempt, for file-based routers.
+- File extensions on relative imports (`useImportExtensions`). See [Imports](#imports).
 
 Warnings never fail CI. They flag code worth a second look:
 
@@ -105,10 +106,30 @@ Use it as `"extends": "@significa/ts-standards/tsconfig/<preset>"`.
 - **Astro with React islands:** add `"jsx": "react-jsx"` and `"jsxImportSource": "react"` to `compilerOptions`.
 - **Node runs TypeScript directly**, which shapes the `node` preset:
   - `"type": "module"` in `package.json`.
-  - Local imports carry the `.ts` extension.
-  - Aliases use [subpath imports](https://nodejs.org/api/packages.html#subpath-imports), since Node doesn't read `paths`: `"imports": { "#/*": "./src/*" }`.
+  - `#/` imports need Node ≥ 24.14.
   - JSON imports need an attribute: `import data from "./data.json" with { type: "json" };`.
-  - A service that compiles with `tsc` to `dist` must set `"rewriteRelativeImportExtensions": true` in its emitting tsconfig (or `"allowImportingTsExtensions": false` when its imports end in `.js`), otherwise TS5096.
+  - A service that compiles with `tsc` to `dist` must set `"rewriteRelativeImportExtensions": true` in its emitting tsconfig, otherwise TS5096. That only rewrites relative imports, so `#/` imports stay `.ts` in the output: use relative imports in code you compile with `tsc`.
+
+## Imports
+
+Every relative and `#/` import names the real file, extension included:
+
+```ts
+import { format } from "./format.ts";
+import { Button } from "#/ui/button/button.tsx";
+```
+
+Aliases are [subpath imports](https://nodejs.org/api/packages.html#subpath-imports) in `package.json`, set exactly like this:
+
+```json
+{ "imports": { "#/*": "./src/*" } }
+```
+
+Not `"./src/*.ts"`, which breaks `.tsx` files, and not an array, which breaks Vite. No tsconfig `paths` needed. This is for code a bundler or Node runs from source; a service that compiles with `tsc` and ships only `dist` uses relative imports instead, because `#/` would still point at `src`. TypeScript, Vite, esbuild and Node all read this field, but only Vite resolves a `#/` import without its extension.
+
+Biome flags a relative import without an extension and its safe fix adds it, including `./dir` to `./dir/index.ts` and `./format.js` to `./format.ts`. It fixes tsconfig `paths` aliases (`@/a` to `@/a.ts`) and `.astro` frontmatter too. It skips `#/` imports, because it doesn't read `package.json` `imports`, so `tsc` catches those.
+
+To make VS Code auto-imports write `.ts` and `.tsx`, set `"typescript.preferences.importModuleSpecifierEnding": "js"`. The `node` preset doesn't need it.
 
 ## TypeScript versions
 
