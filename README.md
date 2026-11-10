@@ -125,7 +125,7 @@ Aliases are [subpath imports](https://nodejs.org/api/packages.html#subpath-impor
 { "imports": { "#/*": "./src/*" } }
 ```
 
-Not `"./src/*.ts"`, which breaks `.tsx` files, and not an array, which breaks Vite. No tsconfig `paths` needed. TypeScript, Vite, esbuild and Node all read this field, but only Vite resolves a `#/` import without its extension.
+Not `"./src/*.ts"`, which breaks `.tsx` files, and not an array, which breaks Vite. No tsconfig `paths` needed. This is for code a bundler or Node runs from source; a service that compiles with `tsc` and ships only `dist` uses relative imports instead, because `#/` would still point at `src`. TypeScript, Vite, esbuild and Node all read this field, but only Vite resolves a `#/` import without its extension.
 
 Biome flags a relative import without an extension and its safe fix adds it, including `./dir` to `./dir/index.ts` and `./format.js` to `./format.ts`. It fixes tsconfig `paths` aliases (`@/a` to `@/a.ts`) and `.astro` frontmatter too. It skips `#/` imports, because it doesn't read `package.json` `imports`, so `tsc` catches those.
 
