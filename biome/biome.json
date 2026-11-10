@@ -70,8 +70,8 @@
         "useExhaustiveSwitchCases": "warn"
       },
       "performance": {
-        "noBarrelFile": "warn",
-        "noReExportAll": "warn"
+        "noBarrelFile": "error",
+        "noReExportAll": "error"
       },
       "style": {
         "noNonNullAssertion": "error",

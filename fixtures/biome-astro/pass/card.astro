@@ -1,0 +1,15 @@
+---
+import { label } from "./label.ts";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<article class="flex items-center p-4">
+  <h2 class:list={["text-lg", { "font-bold": title }]}>{title}</h2>
+  <img src="/a.png" alt="" />
+  <p>{label}</p>
+</article>

@@ -41,12 +41,12 @@ Errors fail CI:
 - Throw only `Error` objects (`useThrowOnlyError`), so you keep the stack trace.
 - Kebab-case file names (`useFilenamingConvention`), `.astro` files included. `routes/` folders are exempt, for file-based routers.
 - File extensions on relative imports (`useImportExtensions`). See [Imports](#imports).
+- No barrel files (`noBarrelFile`, `noReExportAll`). They hide circular imports, so import each file directly. Any `export … from` counts, in any file; only `export type … from` is allowed. A library's public entry point turns `noBarrelFile` off for that one file in an override.
 
 Warnings never fail CI. They flag code worth a second look:
 
 - Misused promises (`noMisusedPromises`), non-exhaustive switches (`useExhaustiveSwitchCases`) and useless type assertions (`noUselessTypeAssertion`).
 - Import cycles (`noImportCycles`) and deprecated imports (`noDeprecatedImports`).
-- Barrel files (`noBarrelFile`, `noReExportAll`).
 - Overly complex functions (`noExcessiveCognitiveComplexity`, threshold 25).
 
 Turned off:
@@ -56,7 +56,7 @@ Turned off:
 
 Formatting: double quotes, semicolons, trailing commas, 2-space indent, line width 100, sorted imports. Markdown and YAML are formatted too.
 
-In `.astro` files the unused-import and unused-variable checks are off, because Biome only reads their frontmatter.
+In `.astro` files the unused-import and unused-variable checks are off, because Biome only reads their frontmatter. The [Astro preset](#astro) turns them back on.
 
 Build output, `node_modules`, `coverage` and generated route trees are already ignored. Tailwind v4 CSS parses without extra config.
 
@@ -82,6 +82,26 @@ Opt in per project, because Biome needs the path to the CSS file with your `@the
   }
 }
 ```
+
+### Astro
+
+Astro projects extend the Astro preset instead. It builds on the base preset and replaces Prettier: Biome formats and lints the whole `.astro` file, template included, and [Tailwind class sorting](#tailwind-class-sorting), once enabled, covers `class`, `className` and `class:list`.
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+  "extends": ["@significa/ts-standards/biome/astro"]
+}
+```
+
+It's a separate preset because it turns on Biome's experimental full HTML support, which also changes how `.vue`, `.svelte` and `.html` files are handled. Two caveats:
+
+- When Biome wraps a line, it can drop the space between a component and the text after it, e.g. `<Icon /> Label` becomes `<Icon />Label`. Review the diff after the first `biome check --write`.
+- Safe fixes also rewrite code inside inline `<script>` tags. Turn the linter off for files with vendored snippets:
+
+  ```json
+  { "overrides": [{ "includes": ["src/components/analytics.astro"], "linter": { "enabled": false } }] }
+  ```
 
 ### Editor
 

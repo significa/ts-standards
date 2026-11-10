@@ -14,6 +14,7 @@
   ],
   "exports": {
     "./biome": "./biome/biome.json",
+    "./biome/astro": "./biome/astro.json",
     "./tsconfig/base": "./tsconfig/base.json",
     "./tsconfig/react": "./tsconfig/react.json",
     "./tsconfig/astro": "./tsconfig/astro.json",

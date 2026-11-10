@@ -1,0 +1,8 @@
+{
+  "extends": ["@significa/ts-standards/biome/astro"],
+  "linter": {
+    "rules": {
+      "nursery": { "useTailwindSortedClasses": { "level": "error", "fix": "safe" } }
+    }
+  }
+}
