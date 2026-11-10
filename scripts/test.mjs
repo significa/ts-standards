@@ -33,6 +33,7 @@ const biomeFixtures = {
     "fail/extensionless-import.astro lint/correctness/useImportExtensions",
     "fail/unsorted-class.astro lint/nursery/useTailwindSortedClasses",
     "fail/unused-import.astro lint/correctness/noUnusedImports",
+    "fail/unused-variable.astro lint/correctness/noUnusedVariables",
   ],
 };
 
