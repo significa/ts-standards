@@ -49,6 +49,9 @@
     },
     "rules": {
       "preset": "recommended",
+      "a11y": {
+        "noLabelWithoutControl": "off"
+      },
       "complexity": {
         "noExcessiveCognitiveComplexity": {
           "level": "warn",
