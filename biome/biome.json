@@ -60,6 +60,9 @@
           }
         }
       },
+      "correctness": {
+        "useImportExtensions": "error"
+      },
       "nursery": {
         "noFloatingPromises": "error",
         "noMisusedPromises": "warn",

@@ -2,9 +2,6 @@
   "name": "fixtures",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./node/src/*"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.6.6",
     "@significa/ts-standards": "workspace:*",

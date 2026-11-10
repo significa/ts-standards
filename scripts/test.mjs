@@ -19,6 +19,7 @@ const expectedBiomeErrors = [
   "fail/PascalCase.ts lint/style/useFilenamingConvention",
   "fail/console-log.ts lint/suspicious/noConsole",
   "fail/explicit-any.ts lint/suspicious/noExplicitAny",
+  "fail/extensionless-import.ts lint/correctness/useImportExtensions",
   "fail/floating-promise.ts lint/nursery/noFloatingPromises",
   "fail/non-null.ts lint/style/noNonNullAssertion",
   "fail/throw-string.ts lint/style/useThrowOnlyError",
