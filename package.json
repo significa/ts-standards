@@ -3,7 +3,10 @@
   "version": "0.0.1-development",
   "description": "Significa's shared TypeScript / JavaScript standards: Biome config and tsconfig presets.",
   "license": "MIT",
-  "repository": "github:significa/ts-standards",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/significa/ts-standards.git"
+  },
   "packageManager": "pnpm@10.34.9",
   "files": [
     "biome",
