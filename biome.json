@@ -1,5 +1,5 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
   "extends": ["./biome/biome.json"],
-  "files": { "includes": ["!!biome/biome.json", "!!fixtures/biome"] }
+  "files": { "includes": ["!!biome/biome.json", "!!fixtures/biome", "!!fixtures/biome-astro"] }
 }

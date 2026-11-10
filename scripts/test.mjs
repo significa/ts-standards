@@ -14,17 +14,28 @@ const compilers = [
 const biome = bin("@biomejs/biome/bin/biome");
 const tsconfigFixtures = ["base", "react", "astro", "node"];
 
-// Every error biome must report in fixtures/biome. Anything else fails, warnings included.
-const expectedBiomeErrors = [
-  "fail/PascalCase.astro lint/style/useFilenamingConvention",
-  "fail/PascalCase.ts lint/style/useFilenamingConvention",
-  "fail/console-log.ts lint/suspicious/noConsole",
-  "fail/explicit-any.ts lint/suspicious/noExplicitAny",
-  "fail/extensionless-import.ts lint/correctness/useImportExtensions",
-  "fail/floating-promise.ts lint/nursery/noFloatingPromises",
-  "fail/non-null.ts lint/style/noNonNullAssertion",
-  "fail/throw-string.ts lint/style/useThrowOnlyError",
-];
+// Every error biome must report in each Biome fixture. Anything else fails, warnings included.
+const biomeFixtures = {
+  biome: [
+    "fail/PascalCase.astro lint/style/useFilenamingConvention",
+    "fail/PascalCase.ts lint/style/useFilenamingConvention",
+    "fail/barrel.ts lint/performance/noBarrelFile",
+    "fail/console-log.ts lint/suspicious/noConsole",
+    "fail/explicit-any.ts lint/suspicious/noExplicitAny",
+    "fail/extensionless-import.ts lint/correctness/useImportExtensions",
+    "fail/floating-promise.ts lint/nursery/noFloatingPromises",
+    "fail/non-null.ts lint/style/noNonNullAssertion",
+    "fail/re-export-all.ts lint/performance/noBarrelFile",
+    "fail/re-export-all.ts lint/performance/noReExportAll",
+    "fail/throw-string.ts lint/style/useThrowOnlyError",
+  ],
+  "biome-astro": [
+    "fail/extensionless-import.astro lint/correctness/useImportExtensions",
+    "fail/unsorted-class.astro lint/nursery/useTailwindSortedClasses",
+    "fail/unused-import.astro lint/correctness/noUnusedImports",
+    "fail/unused-variable.astro lint/correctness/noUnusedVariables",
+  ],
+};
 
 let failures = 0;
 
@@ -70,24 +81,26 @@ report(
   `$schema: ${schemaBiome.join(".")}, peer range: >=${peerMin.join(".")} <${peerMax.join(".")}`,
 );
 
-const biomeDir = join(fixtures, "biome");
-const { status, output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], biomeDir);
-// A warning keeps its prefix, so it can never stand in for an expected error.
-const actualBiomeErrors = [
-  ...output.matchAll(/^::(error|warning) title=([^,]+),file=([^,]+),/gm),
-].map(([, severity, rule, file]) => {
-  const diagnostic = `${relative(biomeDir, file).replaceAll("\\", "/")} ${rule}`;
-  return severity === "error" ? diagnostic : `warning: ${diagnostic}`;
-});
-const missing = expectedBiomeErrors.filter((error) => !actualBiomeErrors.includes(error));
-const unexpected = actualBiomeErrors.filter((error) => !expectedBiomeErrors.includes(error));
-report(
-  status === 1 && missing.length === 0 && unexpected.length === 0,
-  `biome fixture (${expectedBiomeErrors.length} expected errors, pass/ clean)`,
-  [...missing.map((e) => `missing:    ${e}`), ...unexpected.map((e) => `unexpected: ${e}`)].join(
-    "\n",
-  ) || output,
-);
+for (const [fixture, expectedErrors] of Object.entries(biomeFixtures)) {
+  const dir = join(fixtures, fixture);
+  const { status, output } = run(process.execPath, [biome, "ci", ".", "--reporter=github"], dir);
+  // A warning keeps its prefix, so it can never stand in for an expected error.
+  const actualErrors = [...output.matchAll(/^::(error|warning) title=([^,]+),file=([^,]+),/gm)].map(
+    ([, severity, rule, file]) => {
+      const diagnostic = `${relative(dir, file).replaceAll("\\", "/")} ${rule}`;
+      return severity === "error" ? diagnostic : `warning: ${diagnostic}`;
+    },
+  );
+  const missing = expectedErrors.filter((error) => !actualErrors.includes(error));
+  const unexpected = actualErrors.filter((error) => !expectedErrors.includes(error));
+  report(
+    status === 1 && missing.length === 0 && unexpected.length === 0,
+    `${fixture} fixture (${expectedErrors.length} expected errors, pass/ clean)`,
+    [...missing.map((e) => `missing:    ${e}`), ...unexpected.map((e) => `unexpected: ${e}`)].join(
+      "\n",
+    ) || output,
+  );
+}
 
 console.log(failures ? `\n${failures} failed` : "\nall passed");
 process.exit(failures ? 1 : 0);
