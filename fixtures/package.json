@@ -6,7 +6,7 @@
     "#/*": "./biome/pass/*"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.6",
+    "@biomejs/biome": "2.6.7",
     "@significa/ts-standards": "workspace:*",
     "@types/node": "^24",
     "@types/react": "^19",

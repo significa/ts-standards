@@ -30,7 +30,7 @@
     "test": "node scripts/test.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.6"
+    "@biomejs/biome": "2.6.7"
   },
   "peerDependencies": {
     "@biomejs/biome": ">=2.6.0 <2.7.0",
